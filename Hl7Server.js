@@ -6,8 +6,8 @@ var util = require("util"),
 
 var help = require('./Helpers.js');
 
-function createHL7AckForMessageNumber(messageNumber) {
-      var ack = 'MSH|^~\\&|||||' + help.generateTimeStamp() + '||ACK^RO1|'+ help.getUniqueMessageNumber() +'|T|2.5\rMSA|AA|' + messageNumber;
+function createHL7AckForMessageNumber(messageNumber, eventType) {
+      var ack = 'MSH|^~\\&|||||' + help.generateTimeStamp() + '||ACK^'+eventType+'|'+ help.getUniqueMessageNumber() +'|T|2.5\rMSA|AA|' + messageNumber;
       return ack;
 }
 
@@ -35,11 +35,12 @@ var server = net.createServer(function(stream)
       util.log("Received from client: " + data);
 
       var hl7msg = l7.parse(data)
+      console.dir(hl7msg);
       var version = hl7msg.query('MSH|12')  // 2.3
       var messageType = hl7msg.query('MSH|9')
       var messageNum = hl7msg.query('MSH|10')
       //send it back to the client
-      stream.write(createHL7AckForMessageNumber(messageNum));
+      stream.write(createHL7AckForMessageNumber(messageNum,messageType));
 
       var server = 'amqp://localhost';
       var queue = 'exchange';
